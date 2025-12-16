@@ -1,30 +1,47 @@
 // src/App.tsx
 
 import React, { useState } from 'react';
-import { RegionForm } from './components/RegionForm';
-import { RegionList } from './components/RegionList';
+import { Tabs } from './components/common/Tabs';
+import { RegionList } from './components/regions/RegionList';
+import { ManagerList } from './components/managers/ManagerList';
+import { LifeguardList } from './components/lifeguards/LifeguardList';
+
+const tabs = [
+  { id: 'regions', label: 'Regions' },
+  { id: 'managers', label: 'Managers' },
+  { id: 'lifeguards', label: 'Lifeguards' },
+];
 
 const App: React.FC = () => {
+  const [activeTab, setActiveTab] = useState('regions');
   const [refreshSignal, setRefreshSignal] = useState(0);
 
-  const handleCreated = () => {
-    // bump signal so RegionList re-fetches
+  const handleDataChange = () => {
+    // Bump signal so all lists re-fetch when data changes
     setRefreshSignal((prev) => prev + 1);
   };
 
   return (
     <div className="app-container">
       <header className="app-header">
-        <h1>Admin Portal – Regions</h1>
+        <h1>Admin Portal</h1>
         <span>
-          Backend: FastAPI &bull; Endpoints:{' '}
-          <code>/regions/</code>, <code>/regions/&lt;id&gt;</code>
+          Manage Regions, Managers & Lifeguards
         </span>
       </header>
 
-      <div className="grid-two-column">
-        <RegionForm onCreated={handleCreated} />
-        <RegionList refreshSignal={refreshSignal} />
+      <Tabs tabs={tabs} activeTab={activeTab} onTabChange={setActiveTab} />
+
+      <div className="tab-content">
+        {activeTab === 'regions' && (
+          <RegionList refreshSignal={refreshSignal} onDataChange={handleDataChange} />
+        )}
+        {activeTab === 'managers' && (
+          <ManagerList refreshSignal={refreshSignal} onDataChange={handleDataChange} />
+        )}
+        {activeTab === 'lifeguards' && (
+          <LifeguardList refreshSignal={refreshSignal} onDataChange={handleDataChange} />
+        )}
       </div>
     </div>
   );

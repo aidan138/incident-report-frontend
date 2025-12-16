@@ -3,8 +3,10 @@
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8000';
 
-// Adjust this if your router is mounted at /api/regions, etc.
+// Adjust these if your routers are mounted at different paths
 export const REGIONS_BASE_PATH = '/regions';
+export const MANAGERS_BASE_PATH = '/managers';
+export const LIFEGUARDS_BASE_PATH = '/lifeguards';
 
 interface RequestOptions extends RequestInit {
   jsonBody?: unknown;

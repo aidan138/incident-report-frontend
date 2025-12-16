@@ -5,15 +5,22 @@
 export interface LifeguardPayload {
   name: string;
   phone: string;     // "+1-555-000-1111" etc.
-  region: string;    // region slug
+  region_id: string; // region UUID
 }
 
-export interface Lifeguard extends LifeguardPayload {
-  pk: string;        // UUID
-  created: string;   // ISO datetime
+export interface LifeguardUpdate {
+  name?: string;
+  phone?: string;
+  region_id?: string;
+}
 
-  // computed_field in Pydantic -> exposed as id
-  id: string;
+export interface LifeguardRead {
+  pk: string;        // UUID
+  id: string;        // computed_field in Pydantic
+  name: string;
+  phone: string;
+  region_id: string;
+  created: string;   // ISO datetime
 }
 
 
@@ -23,7 +30,6 @@ export interface RegionSummary {
   pk: string;
   slug: string;
   locations: Record<string, string>;
-
   id: string;
 }
 
@@ -31,7 +37,6 @@ export interface ManagerSummary {
   pk: string;
   name: string;
   email: string;
-
   id: string;
 }
 
@@ -43,9 +48,15 @@ export interface RegionBase {
   locations: Record<string, string>;
 }
 
-// Request payload: managers as names
+// Request payload for creation
 export interface RegionPayload extends RegionBase {
   managers?: string[];  // manager names
+}
+
+// Request payload for update
+export interface RegionUpdate {
+  slug?: string;
+  locations?: Record<string, string>;
 }
 
 export interface RegionLocationUpdate {
@@ -66,10 +77,11 @@ export interface RegionRead extends RegionBase {
 export interface ManagerPayload {
   name: string;
   email: string;
-  region_slugs: string[];
+  region_slugs?: string[];
 }
 
 export interface ManagerUpdate {
+  name?: string;
   email?: string;
 }
 
@@ -79,4 +91,5 @@ export interface ManagerRead {
   email: string;
   regions: RegionSummary[];
   id: string;
+  created: string;
 }
