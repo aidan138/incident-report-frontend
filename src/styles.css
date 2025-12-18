@@ -436,6 +436,117 @@ select.inline-edit {
   color: #6b7280;
 }
 
+/* ===== Locations Display ===== */
+.locations-display {
+  max-height: 150px;
+  overflow-y: auto;
+}
+
+.locations-table {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  overflow: hidden;
+  background: #fff;
+  font-size: 0.85rem;
+}
+
+.locations-table-header {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 8px;
+  padding: 6px 10px;
+  background: #f3f4f6;
+  font-weight: 600;
+  color: #374151;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.locations-table-body {
+  max-height: 100px;
+  overflow-y: auto;
+}
+
+.locations-table-row {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 8px;
+  padding: 6px 10px;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.locations-table-row:last-child {
+  border-bottom: none;
+}
+
+.locations-table-row span:first-child {
+  font-weight: 500;
+  color: #111827;
+}
+
+.locations-table-row span:last-child {
+  color: #6b7280;
+}
+
+/* ===== Locations Editor ===== */
+.locations-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+}
+
+.locations-editor.inline {
+  padding: 8px;
+}
+
+.locations-header {
+  display: grid;
+  grid-template-columns: 1fr 1.5fr 32px;
+  gap: 8px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+  padding-bottom: 4px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.location-row {
+  display: grid;
+  grid-template-columns: 1fr 1.5fr 32px;
+  gap: 8px;
+  align-items: center;
+}
+
+.location-row input {
+  font: inherit;
+  padding: 6px 8px;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  font-size: 0.85rem;
+}
+
+.location-row input:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+}
+
+.location-row button {
+  padding: 4px 8px;
+  font-size: 1rem;
+  line-height: 1;
+}
+
 /* ===== Responsive ===== */
 @media (max-width: 768px) {
   .app-container {

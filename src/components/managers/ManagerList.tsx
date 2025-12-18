@@ -282,10 +282,7 @@ export const ManagerList: React.FC<ManagerListProps> = ({ refreshSignal, onDataC
                             className="inline-edit"
                           />
                         ) : (
-                          <>
-                            <div className="primary-text">{manager.name}</div>
-                            <div className="code-block small">{manager.id}</div>
-                          </>
+                          <div className="primary-text">{manager.name}</div>
                         )}
                       </td>
                       <td>
@@ -311,7 +308,11 @@ export const ManagerList: React.FC<ManagerListProps> = ({ refreshSignal, onDataC
                           ))
                         )}
                       </td>
-                      <td>{new Date(manager.created).toLocaleDateString()}</td>
+                      <td>
+                        {manager.created && !isNaN(new Date(manager.created).getTime())
+                          ? new Date(manager.created).toLocaleDateString()
+                          : '—'}
+                      </td>
                       <td>
                         {isEditing ? (
                           <div className="button-row">

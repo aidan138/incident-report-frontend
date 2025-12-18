@@ -17,10 +17,26 @@ interface RegionListProps {
   onDataChange: () => void;
 }
 
-const sampleLocations = `{
-  "loc1": "Main Pool",
-  "loc2": "West Pool"
-}`;
+interface LocationEntry {
+  name: string;
+  address: string;
+}
+
+// Helper to convert Record<string, string> to LocationEntry array
+const locationsToArray = (locations: Record<string, string>): LocationEntry[] => {
+  return Object.entries(locations).map(([name, address]) => ({ name, address }));
+};
+
+// Helper to convert LocationEntry array to Record<string, string>
+const arrayToLocations = (entries: LocationEntry[]): Record<string, string> => {
+  const result: Record<string, string> = {};
+  entries.forEach((entry) => {
+    if (entry.name.trim()) {
+      result[entry.name.trim()] = entry.address.trim();
+    }
+  });
+  return result;
+};
 
 export const RegionList: React.FC<RegionListProps> = ({ refreshSignal, onDataChange }) => {
   const [regions, setRegions] = useState<RegionRead[]>([]);
@@ -31,14 +47,14 @@ export const RegionList: React.FC<RegionListProps> = ({ refreshSignal, onDataCha
   // Create form state
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [newSlug, setNewSlug] = useState('');
-  const [newLocationsText, setNewLocationsText] = useState(sampleLocations);
+  const [newLocations, setNewLocations] = useState<LocationEntry[]>([{ name: '', address: '' }]);
   const [creating, setCreating] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
 
   // Inline editing state
   const [editingRegionId, setEditingRegionId] = useState<string | null>(null);
   const [editSlug, setEditSlug] = useState('');
-  const [editLocationsText, setEditLocationsText] = useState('');
+  const [editLocations, setEditLocations] = useState<LocationEntry[]>([]);
   const [saving, setSaving] = useState(false);
   const [rowError, setRowError] = useState<string | null>(null);
 
@@ -70,33 +86,30 @@ export const RegionList: React.FC<RegionListProps> = ({ refreshSignal, onDataCha
     e.preventDefault();
     setCreateError(null);
 
-    let locations: Record<string, string>;
-    try {
-      locations = JSON.parse(newLocationsText);
-      if (typeof locations !== 'object' || Array.isArray(locations)) {
-        throw new Error('Locations must be a JSON object');
-      }
-    } catch (err) {
-      setCreateError(`Invalid JSON: ${err instanceof Error ? err.message : String(err)}`);
+    if (!newSlug.trim()) {
+      setCreateError('Slug is required');
       return;
     }
+
+    const validLocations = newLocations.filter((loc) => loc.name.trim());
+    if (validLocations.length === 0) {
+      setCreateError('At least one location with a name is required');
+      return;
+    }
+
+    const locations = arrayToLocations(newLocations);
 
     const payload: RegionPayload = {
       slug: newSlug.trim(),
       locations,
     };
 
-    if (!payload.slug) {
-      setCreateError('Slug is required');
-      return;
-    }
-
     setCreating(true);
     try {
       const newRegion = await createRegion(payload);
       setRegions((prev) => [...prev, newRegion]);
       setNewSlug('');
-      setNewLocationsText(sampleLocations);
+      setNewLocations([{ name: '', address: '' }]);
       setShowCreateForm(false);
       onDataChange();
     } catch (err) {
@@ -104,6 +117,36 @@ export const RegionList: React.FC<RegionListProps> = ({ refreshSignal, onDataCha
     } finally {
       setCreating(false);
     }
+  };
+
+  // Location entry handlers for create form
+  const addNewLocation = () => {
+    setNewLocations((prev) => [...prev, { name: '', address: '' }]);
+  };
+
+  const updateNewLocation = (index: number, field: 'name' | 'address', value: string) => {
+    setNewLocations((prev) =>
+      prev.map((loc, i) => (i === index ? { ...loc, [field]: value } : loc))
+    );
+  };
+
+  const removeNewLocation = (index: number) => {
+    setNewLocations((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  // Location entry handlers for edit form
+  const addEditLocation = () => {
+    setEditLocations((prev) => [...prev, { name: '', address: '' }]);
+  };
+
+  const updateEditLocation = (index: number, field: 'name' | 'address', value: string) => {
+    setEditLocations((prev) =>
+      prev.map((loc, i) => (i === index ? { ...loc, [field]: value } : loc))
+    );
+  };
+
+  const removeEditLocation = (index: number) => {
+    setEditLocations((prev) => prev.filter((_, i) => i !== index));
   };
 
   const handleDelete = async (id: string) => {
@@ -121,35 +164,33 @@ export const RegionList: React.FC<RegionListProps> = ({ refreshSignal, onDataCha
     setRowError(null);
     setEditingRegionId(region.id);
     setEditSlug(region.slug);
-    setEditLocationsText(JSON.stringify(region.locations, null, 2));
+    const entries = locationsToArray(region.locations);
+    setEditLocations(entries.length > 0 ? entries : [{ name: '', address: '' }]);
     setAssigningRegionId(null);
   };
 
   const cancelEditing = () => {
     setEditingRegionId(null);
     setEditSlug('');
-    setEditLocationsText('');
+    setEditLocations([]);
     setRowError(null);
   };
 
   const saveRegion = async (regionId: string) => {
     setRowError(null);
 
-    let locations: Record<string, string>;
-    try {
-      locations = JSON.parse(editLocationsText);
-      if (typeof locations !== 'object' || Array.isArray(locations)) {
-        throw new Error('Locations must be a JSON object');
-      }
-    } catch (err) {
-      setRowError(`Invalid JSON: ${err instanceof Error ? err.message : String(err)}`);
-      return;
-    }
-
     if (!editSlug.trim()) {
       setRowError('Slug is required');
       return;
     }
+
+    const validLocations = editLocations.filter((loc) => loc.name.trim());
+    if (validLocations.length === 0) {
+      setRowError('At least one location with a name is required');
+      return;
+    }
+
+    const locations = arrayToLocations(editLocations);
 
     setSaving(true);
     try {
@@ -210,17 +251,46 @@ export const RegionList: React.FC<RegionListProps> = ({ refreshSignal, onDataCha
                   type="text"
                   value={newSlug}
                   onChange={(e) => setNewSlug(e.target.value)}
-                  placeholder="e.g. seattle, north-bay"
+                  placeholder="e.g. aliso-niguel, orange"
                 />
               </div>
             </div>
             <div className="form-group">
-              <label>Locations (JSON object)</label>
-              <textarea
-                rows={4}
-                value={newLocationsText}
-                onChange={(e) => setNewLocationsText(e.target.value)}
-              />
+              <label>Locations</label>
+              <div className="locations-editor">
+                <div className="locations-header">
+                  <span>Name</span>
+                  <span>Address</span>
+                  <span></span>
+                </div>
+                {newLocations.map((loc, index) => (
+                  <div key={index} className="location-row">
+                    <input
+                      type="text"
+                      value={loc.name}
+                      onChange={(e) => updateNewLocation(index, 'name', e.target.value)}
+                      placeholder="Location name"
+                    />
+                    <input
+                      type="text"
+                      value={loc.address}
+                      onChange={(e) => updateNewLocation(index, 'address', e.target.value)}
+                      placeholder="Address"
+                    />
+                    <button
+                      type="button"
+                      className="danger small"
+                      onClick={() => removeNewLocation(index)}
+                      disabled={newLocations.length === 1}
+                    >
+                      &times;
+                    </button>
+                  </div>
+                ))}
+                <button type="button" className="secondary small" onClick={addNewLocation}>
+                  + Add Location
+                </button>
+              </div>
             </div>
             <div className="button-row">
               <button type="submit" className="primary" disabled={creating}>
@@ -265,24 +335,66 @@ export const RegionList: React.FC<RegionListProps> = ({ refreshSignal, onDataCha
                             className="inline-edit"
                           />
                         ) : (
-                          <>
-                            <div className="primary-text">{region.slug}</div>
-                            <div className="code-block small">{region.id}</div>
-                          </>
+                          <div className="primary-text">{region.slug}</div>
                         )}
                       </td>
                       <td>
                         {isEditing ? (
-                          <textarea
-                            rows={4}
-                            value={editLocationsText}
-                            onChange={(e) => setEditLocationsText(e.target.value)}
-                            className="inline-edit"
-                          />
+                          <div className="locations-editor inline">
+                            <div className="locations-header">
+                              <span>Name</span>
+                              <span>Address</span>
+                              <span></span>
+                            </div>
+                            {editLocations.map((loc, index) => (
+                              <div key={index} className="location-row">
+                                <input
+                                  type="text"
+                                  value={loc.name}
+                                  onChange={(e) => updateEditLocation(index, 'name', e.target.value)}
+                                  placeholder="Name"
+                                />
+                                <input
+                                  type="text"
+                                  value={loc.address}
+                                  onChange={(e) => updateEditLocation(index, 'address', e.target.value)}
+                                  placeholder="Address"
+                                />
+                                <button
+                                  type="button"
+                                  className="danger small"
+                                  onClick={() => removeEditLocation(index)}
+                                  disabled={editLocations.length === 1}
+                                >
+                                  &times;
+                                </button>
+                              </div>
+                            ))}
+                            <button type="button" className="secondary small" onClick={addEditLocation}>
+                              + Add
+                            </button>
+                          </div>
                         ) : (
-                          <pre className="code-block">
-                            {JSON.stringify(region.locations, null, 2)}
-                          </pre>
+                          <div className="locations-display">
+                            {Object.keys(region.locations).length === 0 ? (
+                              <span className="muted">No locations</span>
+                            ) : (
+                              <div className="locations-table">
+                                <div className="locations-table-header">
+                                  <span>Name</span>
+                                  <span>Address</span>
+                                </div>
+                                <div className="locations-table-body">
+                                  {Object.entries(region.locations).map(([name, address]) => (
+                                    <div key={name} className="locations-table-row">
+                                      <span>{name}</span>
+                                      <span>{address}</span>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                          </div>
                         )}
                       </td>
                       <td>

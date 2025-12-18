@@ -253,10 +253,7 @@ export const LifeguardList: React.FC<LifeguardListProps> = ({ refreshSignal, onD
                             className="inline-edit"
                           />
                         ) : (
-                          <>
-                            <div className="primary-text">{lifeguard.name}</div>
-                            <div className="code-block small">{lifeguard.id}</div>
-                          </>
+                          <div className="primary-text">{lifeguard.name}</div>
                         )}
                       </td>
                       <td>
