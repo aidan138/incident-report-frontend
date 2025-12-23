@@ -7,6 +7,7 @@ const API_BASE_URL =
 export const REGIONS_BASE_PATH = '/regions';
 export const MANAGERS_BASE_PATH = '/managers';
 export const LIFEGUARDS_BASE_PATH = '/lifeguards';
+export const INCIDENTS_BASE_PATH = '/incident';
 
 interface RequestOptions extends RequestInit {
   jsonBody?: unknown;

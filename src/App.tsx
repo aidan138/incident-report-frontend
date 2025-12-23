@@ -5,11 +5,13 @@ import { Tabs } from './components/common/Tabs';
 import { RegionList } from './components/regions/RegionList';
 import { ManagerList } from './components/managers/ManagerList';
 import { LifeguardList } from './components/lifeguards/LifeguardList';
+import { IncidentList } from './components/incidents/IncidentList';
 
 const tabs = [
   { id: 'regions', label: 'Regions' },
   { id: 'managers', label: 'Managers' },
   { id: 'lifeguards', label: 'Lifeguards' },
+  { id: 'incidents', label: 'Incidents' },
 ];
 
 const App: React.FC = () => {
@@ -41,6 +43,9 @@ const App: React.FC = () => {
         )}
         {activeTab === 'lifeguards' && (
           <LifeguardList refreshSignal={refreshSignal} onDataChange={handleDataChange} />
+        )}
+        {activeTab === 'incidents' && (
+          <IncidentList refreshSignal={refreshSignal} onDataChange={handleDataChange} />
         )}
       </div>
     </div>

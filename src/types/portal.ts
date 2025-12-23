@@ -93,3 +93,19 @@ export interface ManagerRead {
   id: string;
   created: string;
 }
+
+
+// ---------- Incidents ----------
+
+export interface IncidentSummary {
+  pk: string;           // UUID
+  id: string;           // computed_field from pk
+  state: string;        // 'done', 'sending', 'error', etc.
+  created: string;      // ISO datetime
+  employee_completing_report: string;
+  group_id: string;     // UUID for grouping related incidents
+  person_involved_name: string;
+  region_id: string;    // UUID
+  date_of_incident: string; // ISO date (YYYY-MM-DD)
+  incident_summary: string;
+}
